@@ -1,0 +1,128 @@
+# Model configuration for all forecasting models
+
+version: "1.0"
+
+# Splits must match the sample dates in base.yaml.
+# test_splits pairs with base.yaml test_sample (test_mode: true).
+# splits pairs with base.yaml sample (test_mode: false).
+test_splits:
+  train_end: "2022-12-31"
+  validation_end: "2023-12-31"
+  test_start: "2024-01-01"
+
+splits:
+  train_end: "2018-12-31"
+  validation_end: "2021-12-31"
+  test_start: "2022-01-01"
+  rationale: >
+    Chronological split with no overlap. Validation period includes
+    COVID (2020) to test crisis robustness. Test period is post-COVID
+    normalization.
+
+macro_features:
+  - payems_lag1
+  - payems_lag2
+  - unrate_lag1
+  - icsa_lag1
+  - jtsjol_lag1
+  - cpi_lag1
+  - fedfunds_lag1
+  - indpro_lag1
+
+news_features:
+  - news_volume
+  - layoff_news_count
+  - hiring_news_count
+  - unemployment_news_count
+  - job_openings_news_count
+  - wage_news_count
+  - uncertainty_news_count
+
+target_column: target_payems_next
+
+models:
+  naive:
+    type: naive
+    strategy: last_value
+    description: Predicts next month = last observed MoM change
+    features: [payems_lag1]
+    param_search:
+      strategy: grid
+      search_space:
+        lag1_weight: [1.0, 0.9, 0.7, 0.5, 0.3, 0.0]
+
+  arima:
+    type: arima
+    order: [2, 0, 2]
+    description: ARIMA on PAYEMS MoM change series
+    features: [payems_lag1, payems_lag2]
+    param_search:
+      strategy: optuna
+      n_trials: 40
+      n_trials_test: 20
+      search_space:
+        p: [0, 4]
+        d: [0, 1]
+        q: [0, 4]
+
+  xgboost_macro_only:
+    type: xgboost
+    features: macro_features
+    hyperparameters:
+      n_estimators: 200
+      max_depth: 4
+      learning_rate: 0.05
+      subsample: 0.8
+      colsample_bytree: 0.8
+      min_child_weight: 3
+      random_state: 42
+      n_jobs: -1
+
+  xgboost_news_only:
+    type: xgboost
+    features: news_features
+    hyperparameters:
+      n_estimators: 200
+      max_depth: 3
+      learning_rate: 0.05
+      subsample: 0.8
+      colsample_bytree: 0.8
+      min_child_weight: 3
+      random_state: 42
+      n_jobs: -1
+
+  xgboost_macro_news:
+    type: xgboost
+    features: [macro_features, news_features]
+    hyperparameters:
+      n_estimators: 300
+      max_depth: 4
+      learning_rate: 0.05
+      subsample: 0.8
+      colsample_bytree: 0.8
+      min_child_weight: 3
+      random_state: 42
+      n_jobs: -1
+
+param_search:
+  n_trials: 100        # full mode (test_mode: false)
+  n_trials_test: 30    # test mode (test_mode: true)
+  search_space:
+    n_estimators: [100, 800]
+    max_depth: [3, 8]
+    learning_rate: [0.01, 0.3]
+    subsample: [0.6, 1.0]
+    colsample_bytree: [0.6, 1.0]
+    min_child_weight: [1, 10]
+    reg_alpha: [0.0, 1.0]
+    reg_lambda: [1.0, 10.0]
+
+evaluation:
+  metrics:
+    - mae
+    - rmse
+    - directional_accuracy
+  primary_metric: mae
+  comparison_note: >
+    If xgboost_macro_news does NOT beat xgboost_macro_only on the test set,
+    do not claim news improves forecasting. Report the result honestly.

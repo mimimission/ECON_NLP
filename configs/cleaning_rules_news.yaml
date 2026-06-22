@@ -1,0 +1,63 @@
+# News cleaning rules — defined and approved in Notebook 04
+# Modify these rules and re-run Notebook 04 to update cleaning behavior
+
+version: "1.0"
+approved_in_notebook: "04_audit_and_clean_news.ipynb"
+
+filters:
+  language:
+    keep: English
+    rationale: Non-English articles reduce signal quality for US labor market
+
+  title:
+    min_length: 20
+    max_length: 500
+    drop_if_missing: true
+    rationale: Too-short titles are headers/ads; missing titles have no NLP value
+
+  url:
+    drop_if_missing: true
+    drop_if_duplicate: true
+    rationale: Duplicate URLs indicate syndication; we count unique stories
+
+  date:
+    min_date: "2000-01-01"
+    max_date: "2025-01-01"
+    drop_if_missing: true
+    rationale: Out-of-range dates indicate metadata errors
+
+deduplication:
+  fields:
+    - url
+    - title
+    - seendate
+  keep: first
+  rationale: >
+    Deduplicate on URL+title+date to remove exact syndication copies
+    while keeping the same story from different dates (follow-up coverage)
+
+text_for_nlp:
+  fields_to_combine:
+    - title
+    - socialimage_alt
+  separator: " "
+  strip_html: false
+  rationale: >
+    Title is the primary text. socialimage_alt sometimes contains
+    additional descriptive text. We do NOT scrape full article text.
+
+exclusions:
+  domains:
+    - twitter.com
+    - facebook.com
+    - reddit.com
+    - youtube.com
+    - linkedin.com
+  rationale: Social media posts are too noisy for news signal extraction
+
+text_quality:
+  min_word_count: 4
+  rationale: Fewer than 4 words is not a meaningful title
+
+approved: false
+approved_notes: "Set approved: true after running Notebook 04 and inspecting samples."

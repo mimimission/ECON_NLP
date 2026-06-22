@@ -1,0 +1,170 @@
+# Data contracts — expected schemas for all approved artifacts
+# Used by assert functions in notebooks to validate each step
+
+version: "1.0"
+
+contracts:
+
+  fred_current:
+    file: data/raw/fred/fred_current.parquet
+    required_columns:
+      - series_id
+      - observation_date
+      - value
+    key_columns: [series_id, observation_date]
+    date_column: observation_date
+    numeric_columns: [value]
+    no_null_columns: [series_id, observation_date]
+
+  alfred_vintage:
+    file: data/raw/alfred/alfred_vintage.parquet
+    required_columns:
+      - series_id
+      - observation_date
+      - realtime_start
+      - realtime_end
+      - value
+    key_columns: [series_id, observation_date, realtime_start]
+    date_column: observation_date
+    numeric_columns: [value]
+    no_null_columns: [series_id, observation_date, realtime_start]
+
+  news_raw:
+    file: data/raw/gdelt/news_raw.parquet
+    required_columns:
+      - url
+      - title
+      - seendate
+      - query_group
+      - language
+    key_columns: [url, seendate]
+    date_column: seendate
+    no_null_columns: []
+    expected_query_groups:
+      - layoffs
+      - hiring
+      - unemployment
+      - job_openings
+      - wages
+      - uncertainty
+
+  news_clean:
+    file: data/interim/news/clean_news_approved.parquet
+    required_columns:
+      - url
+      - title
+      - seendate
+      - article_month
+      - query_group
+      - language
+      - text_for_nlp
+    key_columns: [url, seendate]
+    date_column: seendate
+    no_null_columns: [url, title, seendate, article_month, query_group]
+    language_filter: English
+    min_title_length: 20
+
+  macro_vintage_audited:
+    file: data/interim/macro/macro_vintage_audited.parquet
+    required_columns:
+      - series_id
+      - observation_date
+      - value
+      - realtime_start
+    key_columns: [series_id, observation_date]
+    date_column: observation_date
+    numeric_columns: [value]
+    frequency: monthly
+
+  news_features:
+    file: data/features/news/monthly_news_features_approved.parquet
+    required_columns:
+      - article_month
+      - news_volume
+      - layoff_news_count
+      - hiring_news_count
+      - unemployment_news_count
+      - job_openings_news_count
+      - wage_news_count
+      - uncertainty_news_count
+    key_columns: [article_month]
+    date_column: article_month
+    numeric_columns:
+      - news_volume
+      - layoff_news_count
+      - hiring_news_count
+      - unemployment_news_count
+      - job_openings_news_count
+      - wage_news_count
+      - uncertainty_news_count
+
+  macro_features_target:
+    file: data/features/macro/macro_features_target_approved.parquet
+    required_columns:
+      - forecast_date
+      - target_month
+      - payems_lag1
+      - payems_lag2
+      - unrate_lag1
+      - icsa_lag1
+      - jtsjol_lag1
+      - cpi_lag1
+      - fedfunds_lag1
+      - indpro_lag1
+      - target_payems_next
+    key_columns: [forecast_date]
+    date_column: forecast_date
+    numeric_columns:
+      - payems_lag1
+      - payems_lag2
+      - unrate_lag1
+      - icsa_lag1
+      - jtsjol_lag1
+      - cpi_lag1
+      - fedfunds_lag1
+      - indpro_lag1
+      - target_payems_next
+    leakage_check: target_month > forecast_date
+
+  model_ready:
+    file: data/model_ready/labor_forecasting_dataset_approved.parquet
+    required_columns:
+      - forecast_date
+      - target_month
+      - target_payems_next
+      - payems_lag1
+      - payems_lag2
+      - unrate_lag1
+      - icsa_lag1
+      - jtsjol_lag1
+      - cpi_lag1
+      - fedfunds_lag1
+      - indpro_lag1
+      - news_volume
+      - layoff_news_count
+      - hiring_news_count
+      - unemployment_news_count
+      - job_openings_news_count
+      - wage_news_count
+      - uncertainty_news_count
+    key_columns: [forecast_date]
+    leakage_check: target_month > forecast_date
+
+  predictions:
+    required_columns:
+      - forecast_date
+      - target_month
+      - prediction
+      - actual
+      - model_name
+    key_columns: [forecast_date, model_name]
+
+  evidence:
+    file: outputs/explanations/retrieved_evidence.parquet
+    required_columns:
+      - forecast_date
+      - article_date
+      - url
+      - title
+      - query_group
+    leakage_check: article_date <= forecast_date

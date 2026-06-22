@@ -1,0 +1,56 @@
+# Macro data cleaning rules — applied in Notebook 03
+# Covers FRED current data and ALFRED vintage data
+
+version: "1.0"
+approved_in_notebook: "03_audit_macro_vintage.ipynb"
+
+general:
+  date_column: observation_date
+  date_format: "%Y-%m-%d"
+  frequency: monthly
+  expected_day_of_month: 1
+  rationale: All monthly series normalized to first day of month
+
+missing_values:
+  strategy: flag_and_report
+  max_allowed_missing_pct: 0.05
+  rationale: >
+    Do not silently impute macro variables. Flag missing values,
+    report them to the user, and require manual approval before proceeding.
+    If a series has >5% missing, stop and investigate.
+
+outlier_detection:
+  method: z_score
+  threshold: 5.0
+  action: flag_do_not_drop
+  rationale: >
+    COVID months (2020-03 to 2020-06) will appear as outliers.
+    Do NOT drop them — they are real events. Flag and report only.
+
+vintage_handling:
+  use_alfred: true
+  revision_strategy: use_first_release
+  fallback: use_closest_vintage
+  rationale: >
+    For real-time forecasting, we want the value available at forecast_date,
+    not the final revised value. Use ALFRED realtime_start to filter.
+    If no vintage is available for a date, use the closest available vintage.
+
+series_specific:
+  ICSA:
+    aggregation: monthly_mean
+    source_frequency: weekly
+    rationale: Initial claims are weekly; aggregate to monthly mean
+  JTSJOL:
+    publication_lag_months: 2
+    rationale: JOLTS is published with approximately 2-month lag; lag features accordingly
+
+payems_derivation:
+  mom_change_column: payems_mom_change
+  formula: "PAYEMS_t - PAYEMS_{t-1}"
+  units: thousands_of_persons
+  target_shift: 1
+  target_column: target_payems_next
+  rationale: >
+    Target is next month's MoM change. Shift ensures forecast_date < target_month.
+    This is the primary check against data leakage.

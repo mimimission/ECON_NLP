@@ -1,0 +1,59 @@
+# Base configuration for economic-news-labor-rag
+# All paths are relative to Google Drive root
+
+project_name: economic-news-labor-rag
+drive_root: /content/drive/MyDrive/labor_news_rag_project
+
+paths:
+  data:
+    raw:
+      fred: data/raw/fred
+      alfred: data/raw/alfred
+      gdelt: data/raw/gdelt
+    interim:
+      macro: data/interim/macro
+      news: data/interim/news
+    features:
+      macro: data/features/macro
+      news: data/features/news
+    model_ready: data/model_ready
+  artifacts:
+    models: artifacts/models
+    evidence_index: artifacts/evidence_index
+  outputs:
+    predictions: outputs/predictions
+    metrics: outputs/metrics
+    figures: outputs/figures
+    tables: outputs/tables
+    explanations: outputs/explanations
+    logs: outputs/logs
+    data_quality: outputs/data_quality
+  approvals: approvals
+
+target:
+  series: PAYEMS
+  transformation: mom_change     # month-on-month change
+  horizon: 1                     # forecast t+1
+  column_name: target_payems_next
+
+# Set test_mode: true to run the pipeline on a small date range first.
+# Set test_mode: false (or comment out) to run on the full sample.
+test_mode: true
+
+# Quick pipeline test: 3 years, ~12 rows per split
+test_sample:
+  start_date: "2022-01-01"
+  end_date: "2024-12-31"
+  train_end: "2022-12-31"
+  validation_end: "2023-12-31"
+  test_start: "2024-01-01"
+
+# Full research run: 2000–2024
+sample:
+  start_date: "2000-01-01"
+  end_date: "2024-12-31"
+  train_end: "2018-12-31"
+  validation_end: "2021-12-31"
+  test_start: "2022-01-01"
+
+random_seed: 42

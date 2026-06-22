@@ -1,0 +1,80 @@
+# FRED/ALFRED series to download
+# Each entry specifies the series, its role, and expected frequency
+
+series:
+  - id: PAYEMS
+    name: Total Nonfarm Payrolls
+    role: target
+    frequency: monthly
+    units: thousands_of_persons
+    seasonal_adjustment: seasonally_adjusted
+    notes: Main target variable. MoM change used as forecast target.
+
+  - id: UNRATE
+    name: Civilian Unemployment Rate
+    role: macro_feature
+    frequency: monthly
+    units: percent
+    seasonal_adjustment: seasonally_adjusted
+    lag_used: 1
+
+  - id: ICSA
+    name: Initial Claims (Seasonally Adjusted)
+    role: macro_feature
+    frequency: weekly
+    aggregation: monthly_mean
+    units: number
+    seasonal_adjustment: seasonally_adjusted
+    lag_used: 1
+    notes: Aggregate weekly to monthly mean before use.
+
+  - id: JTSJOL
+    name: Job Openings (JOLTS)
+    role: macro_feature
+    frequency: monthly
+    units: thousands
+    seasonal_adjustment: seasonally_adjusted
+    lag_used: 1
+    notes: Published with ~2-month lag; important real-time caveat.
+
+  - id: CES0500000003
+    name: Average Hourly Earnings All Employees
+    role: macro_feature
+    frequency: monthly
+    units: dollars_per_hour
+    seasonal_adjustment: seasonally_adjusted
+    lag_used: 1
+
+  - id: CPIAUCSL
+    name: Consumer Price Index All Urban Consumers
+    role: macro_feature
+    frequency: monthly
+    units: index_1982_84_eq_100
+    seasonal_adjustment: seasonally_adjusted
+    lag_used: 1
+
+  - id: FEDFUNDS
+    name: Federal Funds Effective Rate
+    role: macro_feature
+    frequency: monthly
+    units: percent
+    seasonal_adjustment: not_seasonally_adjusted
+    lag_used: 1
+
+  - id: INDPRO
+    name: Industrial Production Index
+    role: macro_feature
+    frequency: monthly
+    units: index_2017_eq_100
+    seasonal_adjustment: seasonally_adjusted
+    lag_used: 1
+
+alfred:
+  use_vintage: true
+  realtime_start_default: "1970-01-01"
+  realtime_end_default: "9999-12-31"
+  vintage_fallback: use_closest_available
+  notes: >
+    ALFRED vintage data uses realtime_start and realtime_end to identify
+    the value that was *available* at the forecast date. This prevents
+    look-ahead bias from revised data.

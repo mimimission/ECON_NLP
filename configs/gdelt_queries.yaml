@@ -1,0 +1,101 @@
+# GDELT query configuration for labor-market news collection
+# Uses GDELT GKG/DOC API v2
+
+api:
+  base_url: https://api.gdeltproject.org/api/v2/doc/doc
+  format: json
+  max_records: 250
+  timespan_days: 30
+  rate_limit_sleep_seconds: 2
+  retry_attempts: 3
+  retry_sleep_seconds: 5
+
+query_groups:
+  layoffs:
+    label: Layoffs
+    keywords:
+      - layoffs
+      - job cuts
+      - fired workers
+      - mass layoffs
+      - workforce reduction
+      - downsizing
+      - redundancies
+    theme_filter: ECON_UNEMPLOYMENT
+    notes: Captures negative employment shocks
+
+  hiring:
+    label: Hiring
+    keywords:
+      - hiring surge
+      - job growth
+      - employment gains
+      - added jobs
+      - strong hiring
+      - labor demand
+      - job creation
+    theme_filter: ECON_UNEMPLOYMENT
+    notes: Captures positive employment signals
+
+  unemployment:
+    label: Unemployment
+    keywords:
+      - unemployment claims
+      - jobless claims
+      - initial claims
+      - unemployment rate
+      - jobless rate
+    theme_filter: ECON_UNEMPLOYMENT
+    notes: Direct unemployment signal coverage
+
+  job_openings:
+    label: Job Openings
+    keywords:
+      - job openings
+      - JOLTS
+      - labor demand
+      - unfilled positions
+      - job vacancies
+      - help wanted
+    theme_filter: ECON_UNEMPLOYMENT
+    notes: JOLTS and vacancy-related signals
+
+  wages:
+    label: Wages
+    keywords:
+      - wage growth
+      - hourly earnings
+      - salary increase
+      - wage inflation
+      - pay raises
+      - minimum wage
+    theme_filter: ECON_WAGES
+    notes: Wage pressure signals
+
+  uncertainty:
+    label: Economic Uncertainty
+    keywords:
+      - economic uncertainty
+      - labor market uncertainty
+      - jobs outlook
+      - employment outlook
+      - recession fears
+      - slowdown
+    theme_filter: ECON_UNEMPLOYMENT
+    notes: Uncertainty signals that may precede employment changes
+
+filters:
+  language: English
+  domain_country: US
+  source_collections:
+    - WEB
+  exclude_domains:
+    - twitter.com
+    - facebook.com
+    - reddit.com
+    - youtube.com
+  min_title_length: 20
+  dedup_fields:
+    - url
+    - title
+    - seendate
