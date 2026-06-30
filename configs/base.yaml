@@ -38,7 +38,7 @@ target:
 
 # Set test_mode: true to run the pipeline on a small date range first.
 # Set test_mode: false (or comment out) to run on the full sample.
-test_mode: true
+test_mode: false
 
 # Quick pipeline test: 3 years, ~12 rows per split
 test_sample:
