@@ -6,9 +6,9 @@ api:
   format: json
   max_records: 250
   timespan_days: 30
-  rate_limit_sleep_seconds: 2
-  retry_attempts: 3
-  retry_sleep_seconds: 5
+  rate_limit_sleep_seconds: 3     # was 2
+  retry_attempts: 5               # was 3
+  retry_sleep_seconds: 60         # was 5
 
 query_groups:
   layoffs:
